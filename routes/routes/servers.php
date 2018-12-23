@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 
 Route::get('/servers/{server}', function ($server) {
   $premiumState = require_once("/extended/root/var/www/api/guilds.php");
@@ -20,9 +21,24 @@ Route::get('/servers/{server}/message', function ($server) {
   } catch(Throwable $e) { return generateReport($e); }
 });
 
-Route::get('/servers/{server}/messages/{query?}', function ($server, $query = null) {
+Route::get('/servers/{server}/messages/{query?}', function ($server, $query = null, Request $request) {
   try {
-    return mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br(preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars(@file_get_contents('http://104.198.24.108/servers/'.$server.'/messages.log')))));
+    $url = 'http://104.198.24.108/servers/'.$server.'/messages.log';
+    $arr = preg_grep('{'.$query.'}', preg_split('/\n/', mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br( preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars( @file_get_contents($url) ) /*<-htmlspecialchars*/ ) /*<-preg_replace*/ ) /*<-nl2br*/ ) /*<-mb_str_replace*/ ) /*<-explode*/ ) /*<-preg_grep*/;
+    $max = count($arr);
+    $m = '';
+    foreach ($arr as $key => $a) {
+      $head = $request->input('head');
+      $tail = $request->input('tail');
+      if ($head) {
+        if (((int)$head-(int)$key) >= (((int)$key)-(int)$head)) { $m .= $a; }
+      } elseif($tail) {
+        if (($max-(int)$key) <= (int)$tail) { $m .= $a; }
+      } else {
+        $m .= $a;
+      }
+    }
+    return $m;
   } catch(Throwable $e) { return generateReport($e); }
 });
 
@@ -32,9 +48,24 @@ Route::get('/servers/{server}/editedMessage', function ($server) {
   } catch(Throwable $e) { return generateReport($e); }
 });
 
-Route::get('/servers/{server}/editedMessages/{query?}', function ($server, $query = null) {
+Route::get('/servers/{server}/editedMessages/{query?}', function ($server, $query = null, Request $request) {
   try {
-    return mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br(preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars(@file_get_contents('http://104.198.24.108/servers/'.$server.'/editedMessages.log')))));
+    $url = 'http://104.198.24.108/servers/'.$server.'/editedMessages.log';
+    $arr = preg_grep('{'.$query.'}', preg_split('/\n/', mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br( preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars( @file_get_contents($url) ) /*<-htmlspecialchars*/ ) /*<-preg_replace*/ ) /*<-nl2br*/ ) /*<-mb_str_replace*/ ) /*<-explode*/ ) /*<-preg_grep*/;
+    $max = count($arr);
+    $m = '';
+    foreach ($arr as $key => $a) {
+      $head = $request->input('head');
+      $tail = $request->input('tail');
+      if ($head) {
+        if (((int)$head-(int)$key) >= (((int)$key)-(int)$head)) { $m .= $a; }
+      } elseif($tail) {
+        if (($max-(int)$key) <= (int)$tail) { $m .= $a; }
+      } else {
+        $m .= $a;
+      }
+    }
+    return $m;
   } catch(Throwable $e) { return generateReport($e); }
 });
 

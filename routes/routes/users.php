@@ -1,5 +1,6 @@
 <?php
-//try{file_get_contents('http://104.198.24.108/users/254794124744458241/config.json');}catch(Throwable $e){http_response_code(500);die('{"error":"Origin is unreachable"}');}
+
+use Illuminate\Http\Request;
 
 Route::get('/users/{user}', function ($user) {
   try {
@@ -40,9 +41,24 @@ Route::get('/users/{user}/message', function ($user) {
   } catch(Throwable $e) { return generateReport($e); }
 });
 
-Route::get('/users/{user}/messages/{query?}', function ($user, $query = null) {
+Route::get('/users/{user}/messages/{query?}', function ($user, $query = null, Request $request) {
   try {
-    return mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br(preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars(@file_get_contents('http://104.198.24.108/users/'.$user.'/messages.log')))));
+    $url = 'http://104.198.24.108/users/'.$user.'/messages.log';
+    $arr = preg_grep('{'.$query.'}', preg_split('/\n/', mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br( preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars( @file_get_contents($url) ) /*<-htmlspecialchars*/ ) /*<-preg_replace*/ ) /*<-nl2br*/ ) /*<-mb_str_replace*/ ) /*<-explode*/ ) /*<-preg_grep*/;
+    $max = count($arr);
+    $m = '';
+    foreach ($arr as $key => $a) {
+      $head = $request->input('head');
+      $tail = $request->input('tail');
+      if ($head) {
+        if (((int)$head-(int)$key) >= (((int)$key)-(int)$head)) { $m .= $a; }
+      } elseif($tail) {
+        if (($max-(int)$key) <= (int)$tail) { $m .= $a; }
+      } else {
+        $m .= $a;
+      }
+    }
+    return $m;
   } catch(Throwable $e) { return generateReport($e); }
 });
 
@@ -52,9 +68,24 @@ Route::get('/users/{user}/editedMessage', function ($user) {
   } catch(Throwable $e) { return generateReport($e); }
 });
 
-Route::get('/users/{user}/editedMessages/{query?}', function ($user, $query = null) {
+Route::get('/users/{user}/editedMessages/{query?}', function ($user, $query = null, Request $request) {
   try {
-    return mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br(preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars(@file_get_contents('http://104.198.24.108/users/'.$user.'/editedMessages.log')))));
+    $url = 'http://104.198.24.108/users/'.$userr.'/editedMessages.log';
+    $arr = preg_grep('{'.$query.'}', preg_split('/\n/', mb_str_replace($query, "<span style='background-color: #ffff00;'>".$query."</span>", nl2br( preg_replace('/\[2018\//m', "\n[2018/", htmlspecialchars( @file_get_contents($url) ) /*<-htmlspecialchars*/ ) /*<-preg_replace*/ ) /*<-nl2br*/ ) /*<-mb_str_replace*/ ) /*<-explode*/ ) /*<-preg_grep*/;
+    $max = count($arr);
+    $m = '';
+    foreach ($arr as $key => $a) {
+      $head = $request->input('head');
+      $tail = $request->input('tail');
+      if ($head) {
+        if (((int)$head-(int)$key) >= (((int)$key)-(int)$head)) { $m .= $a; }
+      } elseif($tail) {
+        if (($max-(int)$key) <= (int)$tail) { $m .= $a; }
+      } else {
+        $m .= $a;
+      }
+    }
+    return $m;
   } catch(Throwable $e) { return generateReport($e); }
 });
 
